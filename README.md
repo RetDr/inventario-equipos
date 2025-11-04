@@ -22,9 +22,9 @@ Sistema cliente-servidor para gestionar inventario de equipos con interfaz gráf
 
 1. Clona el repositorio:
 
+git remote add origin https://github.com/RetDr/inventario-equipos.git
 
 cd inventario-equipos
-
 
 ## 💻 Uso
 
