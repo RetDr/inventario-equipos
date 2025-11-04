@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Inventario</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            max-width: 900px;
+            width: 100%;
+            padding: 30px;
+        }
+        
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 30px;
+            text-align: center;
+            font-size: 28px;
+        }
+        
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+        
+        button {
+            padding: 10px 20px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+        
+        button:hover {
+            background: #2980b9;
+        }
+        
+        button.danger {
+            background: #e74c3c;
+        }
+        
+        button.danger:hover {
+            background: #c0392b;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+            display: none;
+        }
+        
+        .form-group.active {
+            display: block;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #2c3e50;
+            font-weight: bold;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #bdc3c7;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        
+        input:focus, select:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 5px rgba(52, 152, 219, 0.3);
+        }
+        
+        .form-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        #result {
+            background: #ecf0f1;
+            padding: 20px;
+            border-radius: 5px;
+            min-height: 200px;
+            max-height: 400px;
+            overflow-y: auto;
+            margin-top: 20px;
+            white-space: pre-wrap;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            color: #2c3e50;
+        }
+        
+        .mensaje.exito {
+            color: #27ae60;
+            font-weight: bold;
+        }
+        
+        .mensaje.error {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+        
+        .equipo {
+            background: #f8f9fa;
+            border-left: 4px solid #3498db;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 3px;
+        }
+        
+        .equipo strong {
+            color: #2c3e50;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📦 Sistema de Inventario de Equipos</h1>
+        
+        <div class="controls">
+            <button onclick="mostrarFormulario('registrar')">Registrar</button>
+            <button onclick="mostrarFormulario('consultar')">Ver Todo</button>
+            <button onclick="mostrarFormulario('buscar')">Buscar</button>
+            <button onclick="mostrarFormulario('actualizar')">Actualizar</button>
+        </div>
+        
+        <div class="form-section" id="formSection">
+            <!-- Registrar -->
+            <div id="form-registrar" class="form-group">
+                <label>Código:</label>
+                <input type="text" id="reg-codigo" placeholder="Ej: EQ001">
+                
+                <label>Nombre:</label>
+                <input type="text" id="reg-nombre" placeholder="Ej: Monitor">
+                
+                <label>Tipo:</label>
+                <input type="text" id="reg-tipo" placeholder="Ej: Electrónico">
+                
+                <label>Estado:</label>
+                <select id="reg-estado">
+                    <option>Disponible</option>
+                    <option>En uso</option>
+                    <option>En mantenimiento</option>
+                    <option>Dañado</option>
+                </select>
+                
+                <button onclick="ejecutarRegistrar()" style="margin-top: 10px; background: #27ae60;">Registrar Equipo</button>
+            </div>
+            
+            <!-- Buscar -->
+            <div id="form-buscar" class="form-group">
+                <label>Código a buscar:</label>
+                <input type="text" id="bus-codigo" placeholder="Ej: EQ001">
+                <button onclick="ejecutarBuscar()" style="margin-top: 10px; background: #27ae60;">Buscar</button>
+            </div>
+            
+            <!-- Actualizar -->
+            <div id="form-actualizar" class="form-group">
+                <label>Código:</label>
+                <input type="text" id="act-codigo" placeholder="Ej: EQ001">
+                
+                <label>Nuevo estado:</label>
+                <select id="act-estado">
+                    <option>Disponible</option>
+                    <option>En uso</option>
+                    <option>En mantenimiento</option>
+                    <option>Dañado</option>
+                </select>
+                
+                <button onclick="ejecutarActualizar()" style="margin-top: 10px; background: #27ae60;">Actualizar</button>
+            </div>
+        </div>
+        
+        <div id="result"></div>
+    </div>
+    
+    <script>
+        function mostrarFormulario(tipo) {
+            document.querySelectorAll('.form-group').forEach(el => el.classList.remove('active'));
+            if (tipo === 'consultar') {
+                ejecutarConsultar();
+            } else {
+                document.getElementById(`form-${tipo}`).classList.add('active');
+            }
+        }
+        
+        function limpiarResultado() {
+            document.getElementById('result').innerHTML = '';
+        }
+        
+        function mostrarResultado(texto, tipo = 'info') {
+            const result = document.getElementById('result');
+            const clase = tipo === 'error' ? 'error' : (tipo === 'exito' ? 'exito' : 'info');
+            result.innerHTML += `<div class="mensaje ${clase}">${texto}</div>`;
+        }
+        
+        async function ejecutarRegistrar() {
+            const codigo = document.getElementById('reg-codigo').value;
+            const nombre = document.getElementById('reg-nombre').value;
+            const tipo = document.getElementById('reg-tipo').value;
+            const estado = document.getElementById('reg-estado').value;
+            
+            if (!codigo || !nombre || !tipo) {
+                alert('Completa todos los campos');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/registrar', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({codigo, nombre, tipo, estado})
+                });
+                
+                const data = await response.json();
+                limpiarResultado();
+                mostrarResultado(data.mensaje, data.resultado);
+                
+                if (response.ok) {
+                    document.getElementById('reg-codigo').value = '';
+                    document.getElementById('reg-nombre').value = '';
+                    document.getElementById('reg-tipo').value = '';
+                }
+            } catch (error) {
+                mostrarResultado(`Error: ${error.message}`, 'error');
+            }
+        }
+        
+        async function ejecutarConsultar() {
+            limpiarResultado();
+            try {
+                const response = await fetch('/api/consultar');
+                const data = await response.json();
+                
+                if (data.resultado === 'ok' && data.equipos.length > 0) {
+                    mostrarResultado('INVENTARIO COMPLETO:\n', 'info');
+                    data.equipos.forEach((eq, i) => {
+                        mostrarResultado(`\n${i+1}. Código: ${eq.codigo}\n   Nombre: ${eq.nombre}\n   Tipo: ${eq.tipo}\n   Estado: ${eq.estado}`, 'info');
+                    });
+                } else {
+                    mostrarResultado('El inventario está vacío', 'error');
+                }
+            } catch (error) {
+                mostrarResultado(`Error: ${error.message}`, 'error');
+            }
+        }
+        
+        async function ejecutarBuscar() {
+            const codigo = document.getElementById('bus-codigo').value;
+            if (!codigo) {
+                alert('Ingresa el código');
+                return;
+            }
+            
+            limpiarResultado();
+            try {
+                const response = await fetch(`/api/buscar/${codigo}`);
+                const data = await response.json();
+                
+                if (response.ok) {
+                    mostrarResultado(`EQUIPO ENCONTRADO:\n\nCódigo: ${data.equipo.codigo}\nNombre: ${data.equipo.nombre}\nTipo: ${data.equipo.tipo}\nEstado: ${data.equipo.estado}`, 'exito');
+                } else {
+                    mostrarResultado(data.mensaje, 'error');
+                }
+            } catch (error) {
+                mostrarResultado(`Error: ${error.message}`, 'error');
+            }
+        }
+        
+        async function ejecutarActualizar() {
+            const codigo = document.getElementById('act-codigo').value;
+            const estado = document.getElementById('act-estado').value;
+            
+            if (!codigo) {
+                alert('Ingresa el código');
+                return;
+            }
+            
+            limpiarResultado();
+            try {
+                const response = await fetch('/api/actualizar', {
+                    method: 'PUT',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({codigo, estado})
+                });
+                
+                const data = await response.json();
+                mostrarResultado(data.mensaje, data.resultado);
+                
+                if (response.ok) {
+                    document.getElementById('act-codigo').value = '';
+                }
+            } catch (error) {
+                mostrarResultado(`Error: ${error.message}`, 'error');
+            }
+        }
+    </script>
+</body>
+</html>
