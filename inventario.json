@@ -1,20 +1,20 @@
 [
   {
-    "codigo": "1234123",
-    "nombre": "asdasfd",
-    "tipo": "121234",
+    "codigo": "001",
+    "nombre": "Computadora Oficina",
+    "tipo": "Electrónico",
     "estado": "En mantenimiento"
   },
   {
-    "codigo": "1241234",
-    "nombre": "dasdas",
-    "tipo": "123123",
+    "codigo": "002",
+    "nombre": "Impresora Láser",
+    "tipo": "Electrónico",
     "estado": "En uso"
   },
   {
-    "codigo": "6456745",
-    "nombre": "sdfsdf",
-    "tipo": "435436",
+    "codigo": "003",
+    "nombre": "Mesa oficina 1",
+    "tipo": "Mobiliario",
     "estado": "Dañado"
   }
 ]
